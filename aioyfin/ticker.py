@@ -14,7 +14,6 @@ import json
 
 
 class Ticker:
-    _app_data_regex: ClassVar[re.Pattern] = re.compile(r"root\.App\.main = (\{.+\});\n")
     _all_modules: ClassVar[List[str]] = [
         "summaryProfile",
         "quoteType",
@@ -59,19 +58,6 @@ class Ticker:
     def __init__(self, client: Client, symbol: str):
         self.client = client
         self.symbol = symbol
-
-    @staticmethod
-    def find_quote(html: str) -> Optional[dict]:
-        soup = BeautifulSoup(html, "html.parser", parse_only=SoupStrainer("script"))
-        script = soup.find(string="root.App.main").string
-        try:
-            data = Ticker._app_data_regex.search(script).group(1)
-            data = json.loads(data)
-            data = data["context"]["dispatcher"]["stores"]["QuoteSummaryStorage"]
-        except StopIteration:
-            return None
-        except KeyError:
-            return None
 
     @staticmethod
     def extract_raw(value):
